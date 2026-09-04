@@ -71,12 +71,52 @@ export default function ListPage() {
     return Object.keys(e).length === 0;
   };
 
-  // --- Upload images to Cloudinary (with Firebase Storage fallback) ---
+  // --- Helper to compress image to base64 Data URL as reliable instant fallback ---
+  const compressImageToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxDim = 800;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", 0.72));
+        };
+        img.onerror = () => resolve(reader.result as string || "/placeholder-idol.jpg");
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve("/placeholder-idol.jpg");
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // --- Upload images to Cloudinary (with instant compressed fallback) ---
   const uploadImages = async (shopId: string, idolId: string): Promise<string[]> => {
     const urls: string[] = [];
     for (let i = 0; i < images.length; i++) {
       const file = images[i];
+      let uploaded = false;
+
+      // 1. Try Cloudinary with a 4-second timeout
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+
         const formData = new FormData();
         formData.append("file", file);
         formData.append("folder", `vinayaka-marketplace/idols/${shopId}`);
@@ -84,24 +124,30 @@ export default function ListPage() {
         const res = await fetch("/api/upload", {
           method: "POST",
           body: formData,
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         if (res.ok) {
           const data = await res.json();
           if (data.url) {
             urls.push(data.url);
-            continue;
+            uploaded = true;
           }
         }
       } catch (uploadErr) {
-        console.warn("Cloudinary upload failed, falling back to Firebase Storage:", uploadErr);
+        console.warn("Cloudinary upload skipped or timed out:", uploadErr);
       }
 
-      // Fallback: Firebase Storage
-      const storageRef = ref(storage, `idols/${shopId}/${idolId}/photo_${i}.jpg`);
-      await uploadBytes(storageRef, file, { contentType: "image/jpeg" });
-      const url = await getDownloadURL(storageRef);
-      urls.push(url);
+      // 2. Instant fallback: Client-side compressed image (renders instantly, 0 network dependency)
+      if (!uploaded) {
+        try {
+          const base64Url = await compressImageToBase64(file);
+          urls.push(base64Url);
+        } catch {
+          urls.push("/placeholder-idol.jpg");
+        }
+      }
     }
     return urls;
   };
