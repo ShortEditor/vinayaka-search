@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -154,24 +155,31 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-20 h-20 rounded-full bg-surface-container flex items-center justify-center mb-4">
               <span className="material-symbols-outlined text-outline" style={{ fontSize: "40px" }}>
-                {selectedHeight || selectedPrice ? "filter_alt_off" : "hourglass_empty"}
+                {selectedHeight || selectedPrice ? "filter_alt_off" : "storefront"}
               </span>
             </div>
             <h2 className="text-xl font-bold font-display text-on-surface mb-2">
-              {selectedHeight || selectedPrice ? "No idols found" : "Coming Soon"}
+              {selectedHeight || selectedPrice ? "No matching idols found" : "No Idols Listed Yet"}
             </h2>
-            <p className="text-on-surface-variant text-sm max-w-xs">
+            <p className="text-on-surface-variant text-sm max-w-xs mb-4">
               {selectedHeight || selectedPrice
                 ? "Try removing some filters to see more idols."
-                : "No idols are listed yet. Be the first to list yours!"}
+                : "Be the first artisan or vendor to list a handcrafted clay idol!"}
             </p>
-            {(selectedHeight || selectedPrice) && (
+            {selectedHeight || selectedPrice ? (
               <button
                 onClick={() => { setSelectedHeight(null); setSelectedPrice(null); }}
-                className="btn-secondary mt-4 text-sm py-2 px-5"
+                className="btn-secondary text-sm py-2 px-5"
               >
                 Clear Filters
               </button>
+            ) : (
+              <Link href="/list" className="btn-primary text-sm py-2.5 px-6 inline-flex items-center gap-2">
+                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  add_circle
+                </span>
+                List an Idol (₹10)
+              </Link>
             )}
           </div>
         ) : (

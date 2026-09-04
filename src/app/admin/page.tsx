@@ -121,7 +121,7 @@ export default function AdminDashboard() {
   const verifiedUnlocks = unlocks.filter(u => u.paymentStatus === "verified");
   const pendingIdols = idols.filter(i => i.listingPaymentStatus === "pending");
   const pendingUnlocks = unlocks.filter(u => u.paymentStatus === "pending");
-  const totalRevenue = verifiedListings.length * 10 + verifiedUnlocks.length * 25;
+  const totalRevenue = verifiedListings.length * 10;
 
   const formatDate = (ts: { seconds: number } | null) =>
     ts ? new Date(ts.seconds * 1000).toLocaleString("en-IN") : "—";
@@ -129,8 +129,8 @@ export default function AdminDashboard() {
   const statItems = [
     { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}`, icon: "bar_chart", color: "text-primary" },
     { label: "Verified Listings", value: verifiedListings.length, icon: "storefront", color: "text-success" },
-    { label: "Verified Unlocks", value: verifiedUnlocks.length, icon: "group", color: "text-secondary" },
-    { label: "Pending Approvals", value: pendingIdols.length + pendingUnlocks.length, icon: "pending_actions", color: "text-warning" },
+    { label: "Pending Approvals", value: pendingIdols.length, icon: "pending_actions", color: "text-warning" },
+    { label: "Total Listings", value: idols.length, icon: "inventory_2", color: "text-secondary" },
   ];
 
   return (

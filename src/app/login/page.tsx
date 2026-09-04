@@ -1,11 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  auth,
-} from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -49,7 +46,11 @@ function GoogleIcon() {
   );
 }
 
-export default function LoginPage() {
+interface LoginPageProps {
+  isGate?: boolean;
+}
+
+export default function LoginPage({ isGate = false }: LoginPageProps) {
   const router = useRouter();
   const { user, authLoading } = useAuth();
   const [mode, setMode] = useState<Mode>("signin");
@@ -64,11 +65,13 @@ export default function LoginPage() {
     return new URLSearchParams(window.location.search).get("next") || "/";
   };
 
-  // Already signed in? Skip the form.
+  // Already signed in? Skip to destination
   useEffect(() => {
-    if (!authLoading && user) router.replace(nextUrl());
+    if (!authLoading && user && !isGate) {
+      router.replace(nextUrl());
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authLoading, user]);
+  }, [authLoading, user, isGate]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +83,9 @@ export default function LoginPage() {
       } else {
         await createUserWithEmailAndPassword(auth, email.trim(), password);
       }
-      router.push(nextUrl());
+      if (!isGate) {
+        router.push(nextUrl());
+      }
     } catch (err) {
       setError(friendlyAuthError(err));
       setSubmitting(false);
@@ -93,7 +98,9 @@ export default function LoginPage() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      router.push(nextUrl());
+      if (!isGate) {
+        router.push(nextUrl());
+      }
     } catch (err) {
       setError(friendlyAuthError(err));
       setSubmitting(false);
@@ -103,17 +110,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-clay-base kolam-bg px-4 py-8">
       <div className="w-full max-w-md">
-        {/* Back link */}
-        <Link
-          href="/"
-          className="flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-primary mb-3 transition-colors"
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-            arrow_back
-          </span>
-          Back to marketplace
-        </Link>
-
         <div className="bg-card-surface rounded-2xl border border-clay-base ambient-shadow p-7 sm:p-8">
           {/* Wordmark */}
           <div className="text-center mb-6">
@@ -122,8 +118,8 @@ export default function LoginPage() {
             </h1>
             <p className="text-on-surface-variant text-sm mt-2">
               {mode === "signin"
-                ? "Welcome back. Sign in to continue."
-                : "Create an account to track your unlocks."}
+                ? "Sign in to explore handcrafted clay idols & list your mūrtis"
+                : "Create an account to join the clay idols marketplace"}
             </p>
           </div>
 
@@ -233,8 +229,7 @@ export default function LoginPage() {
           </button>
 
           <p className="text-xs text-on-surface-variant/80 text-center mt-5 leading-relaxed">
-            Signing in lets you keep a record of the shop contacts you unlock.
-            Browsing and listing idols works without an account.
+            Sign in to discover handcrafted clay idols, connect directly with local artisans, and list your idols.
           </p>
         </div>
       </div>

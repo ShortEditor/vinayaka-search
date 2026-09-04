@@ -402,7 +402,7 @@ export default function ListPage() {
                 <li>✅ Your listing is saved and pending review</li>
                 <li>🔍 We verify your payment (UTR) within a few hours</li>
                 <li>🌟 Once approved, your idol goes live for buyers to see</li>
-                <li>📞 Buyers pay ₹25 to unlock your contact details</li>
+                <li>📞 Buyers can directly contact you via Phone & WhatsApp</li>
               </ul>
             </div>
             <div className="flex flex-col gap-3">
