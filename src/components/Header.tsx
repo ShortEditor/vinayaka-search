@@ -2,80 +2,107 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { IoMenu, IoClose } from "react-icons/io5";
-import { GiElephant } from "react-icons/gi";
+import { useAuth } from "@/lib/useAuth";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+
+  const drawerLinks = [
+    { href: "/", icon: "storefront", fill: true, label: "Browse Idols" },
+    { href: "/search", icon: "search", fill: false, label: "Search" },
+    { href: "/orders", icon: "receipt_long", fill: false, label: "My Orders" },
+    {
+      href: user ? "/profile" : "/login",
+      icon: user ? "account_circle" : "login",
+      fill: false,
+      label: user ? "My Profile" : "Sign In",
+    },
+    { href: "/list", icon: "add_circle", fill: false, label: "List Your Idol" },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 bg-surface/95 backdrop-blur-md border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white transition-transform group-hover:scale-110">
-              <GiElephant className="w-6 h-6" />
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-lg font-bold font-[var(--font-heading)] leading-tight gradient-text">
-                Vinayaka Vigrahalu
-              </h1>
-              <p className="text-[10px] text-text-muted leading-none -mt-0.5">
-                Find the perfect Ganesh idol
-              </p>
-            </div>
-          </Link>
+    <>
+      <header className="fixed top-0 w-full z-50 flex justify-between items-center px-4 h-16 bg-surface/95 backdrop-blur-md border-b border-clay-base">
+        <button
+          aria-label="Menu"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="text-primary hover:opacity-80 transition-opacity active:scale-95"
+        >
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>
+            {mobileMenuOpen ? "close" : "menu"}
+          </span>
+        </button>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            <Link
-              href="/"
-              className="text-sm font-medium text-text-muted hover:text-primary transition-colors"
-            >
-              Browse Idols
-            </Link>
-            <Link href="/list" className="btn-primary text-sm py-2.5 px-5">
-              List Your Idol
-            </Link>
-          </nav>
+        <Link href="/">
+          <h1 className="font-display text-[28px] md:text-[32px] font-semibold leading-tight text-primary tracking-tight">
+            Matti Mūrti
+          </h1>
+        </Link>
 
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-bg-alt transition-colors"
-            aria-label="Toggle menu"
+        <div className="flex items-center gap-1">
+          <Link
+            href="/orders"
+            aria-label="My Orders"
+            className="text-primary hover:opacity-80 transition-opacity active:scale-95"
           >
-            {mobileMenuOpen ? (
-              <IoClose className="w-6 h-6" />
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>
+              shopping_bag
+            </span>
+          </Link>
+          <Link
+            href={user ? "/profile" : "/login"}
+            aria-label={user ? "My Profile" : "Sign In"}
+            className="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center overflow-hidden hover:opacity-90 transition-opacity active:scale-95"
+          >
+            {user ? (
+              <span className="text-sm font-bold font-display leading-none">
+                {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
+              </span>
             ) : (
-              <IoMenu className="w-6 h-6" />
+              <span className="material-symbols-outlined" style={{ fontSize: "20px", fontVariationSettings: "'FILL' 1" }}>
+                person
+              </span>
             )}
-          </button>
+          </Link>
         </div>
+      </header>
 
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden pb-4 pt-2 border-t border-border animate-fade-in">
-            <nav className="flex flex-col gap-2">
+      {/* Mobile drawer menu */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 pt-16 animate-fade-in">
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <nav className="relative bg-card-surface w-72 h-full shadow-xl p-6 space-y-2">
+            {user && (
+              <div className="px-4 pb-3 mb-2 border-b border-outline-variant/40">
+                <p className="text-xs text-on-surface-variant">Signed in as</p>
+                <p className="text-sm font-semibold text-on-surface truncate">
+                  {user.displayName || user.email}
+                </p>
+              </div>
+            )}
+            {drawerLinks.map((link) => (
               <Link
-                href="/"
-                className="px-4 py-3 rounded-xl text-sm font-medium text-text-muted hover:bg-bg-alt transition-colors"
+                key={link.label}
+                href={link.href}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-on-surface hover:bg-surface-container transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Browse Idols
+                <span
+                  className="material-symbols-outlined text-primary"
+                  style={{ fontVariationSettings: `'FILL' ${link.fill ? 1 : 0}`, fontSize: "20px" }}
+                >
+                  {link.icon}
+                </span>
+                {link.label}
               </Link>
-              <Link
-                href="/list"
-                className="btn-primary text-sm mx-4"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                List Your Idol
-              </Link>
-            </nav>
-          </div>
-        )}
-      </div>
-    </header>
+            ))}
+          </nav>
+        </div>
+      )}
+    </>
   );
 }

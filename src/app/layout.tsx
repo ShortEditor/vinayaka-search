@@ -1,22 +1,24 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import ClientBody from "@/components/ClientBody";
 
 export const metadata: Metadata = {
-  title: "Vinayaka Vigrahalu | Find Ganesh Idols Near You",
+  title: "Matti Mūrti | Handcrafted Clay Idols Marketplace",
   description:
-    "Browse and compare Vinayaka idols by height and price from local shops. Find the perfect Ganesh idol for Vinayaka Chavithi without visiting every shop.",
+    "Browse and compare handcrafted clay idols by height and price from local artisans. Find the perfect mūrti for your home or temple.",
   keywords: [
-    "Vinayaka",
-    "Ganesh idols",
+    "Matti Mūrti",
+    "clay idols",
+    "Ganesh idol",
     "Vinayaka Chavithi",
     "Ganesh Chaturthi",
-    "buy Ganesh idol",
-    "Vinayaka vigrahalu",
+    "handcrafted idols",
+    "matti vigrahalu",
   ],
   openGraph: {
-    title: "Vinayaka Vigrahalu | Find Ganesh Idols Near You",
+    title: "Matti Mūrti | Handcrafted Clay Idols Marketplace",
     description:
-      "Browse and compare Vinayaka idols by height and price from local shops.",
+      "Browse and compare handcrafted clay idols by height and price from local artisans.",
     type: "website",
   },
 };
@@ -27,9 +29,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-bg text-text">
-        {children}
+    <html lang="en" className="h-full antialiased" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-clay-base text-on-surface font-body" suppressHydrationWarning>
+        <ClientBody>{children}</ClientBody>
       </body>
     </html>
   );
